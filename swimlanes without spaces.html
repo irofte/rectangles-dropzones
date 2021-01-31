@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Swimlane without spaces</title>
+  <style>
+    text {
+      user-select: none; /* Standard syntax */
+    }
+  </style>
+</head>
+<body style="margin: 0;">
+  <div style="position: fixed; right: 0; top: 0;">
+    <ul>
+      <li><a href="./tall & short task.html">Tall & short tasks</a></li>
+      <li><a href="./tall & short task - magnetism.html">Tall & short tasks - magnetism</a></li>
+      <li><a href="./swimlanes without spaces.html">Swimlane without spaces</a></li>
+      <li><a href="./swimlanes without spaces - magnetism.html">Swimlane without spaces - magnetism</a></li>
+      <li><a href="./floating on task.html">Floating on task</a></li>
+      <li><a href="./floating on task - magnetism.html">Floating on task - magnetism</a></li>
+      <li><a href="./task on swimlanes.html">Task on swimlanes</a></li>
+      <li><a href="./task on swimlanes - magnetism.html">Task on swimlane</a></li>
+    </ul>
+  </div>
+  <svg width="1800" height="1000">
+    <rect id="swimlane1" fill="#81d4fa" fill-opacity=0.8 x=50 y=50 width=150 height=100></rect>
+    <rect id="swimlane1_body" fill="#81d4fa" fill-opacity=0.2 x=200 y=50 width=1000 height=100 ></rect>
+    <rect id="swimlane1_outline" style="pointer-events: none;" fill="transparent" stroke="#0000FF" stroke-width=2 x=50 y=51 width=1150 height=98 ></rect>
+
+    <rect id="swimlane2" fill="#81d4fa" fill-opacity=0.8 x=50 y=150 width=150 height=100></rect>
+    <rect id="swimlane2_body" fill="#81d4fa" fill-opacity=0.2 x=200 y=150 width=1000 height=100 ></rect>
+    <rect id="swimlane2_outline" style="pointer-events: none;" fill="transparent" stroke="#0000FF" stroke-width=2 x=50 y=151 width=1150 height=98 ></rect>
+
+    <rect id="swimlane3" fill="#81d4fa" fill-opacity=0.8 x=50 y=250 width=150 height=100></rect>
+    <rect id="swimlane3_body" fill="#81d4fa" fill-opacity=0.2 x=200 y=250 width=1000 height=100 ></rect>
+    <rect id="swimlane3_outline" style="pointer-events: none;" fill="transparent" stroke="#0000FF" stroke-width=2 x=50 y=251 width=1150 height=98 ></rect>
+
+    <rect id="swimlane4" fill="#81d4fa" fill-opacity=0.8 x=50 y=350 width=150 height=100></rect>
+    <rect id="swimlane4_body" fill="#81d4fa" fill-opacity=0.2 x=200 y=350 width=1000 height=100 ></rect>
+    <rect id="swimlane4_outline" style="pointer-events: none;" fill="transparent" stroke="#0000FF" stroke-width=2 x=50 y=351 width=1150 height=98 ></rect>
+
+    <line id="drop-zone" x1=0 y1=0 x2=0 y2=0 stroke-width=1 stroke="#FF0000" stroke-dasharray="4 2"></line>
+</svg>
+
+<script>
+  let svg = document.querySelector("svg");
+  let clonedElement;
+  let draggedElement;
+  let dropZone = document.querySelector("#drop-zone");
+  const lineType = {
+    SOLID: "",
+    DASHED: "4 2"
+  }
+  const lineColors = {
+    ACTIVE: "#FF0000",
+    INACTIVE: "#AAA"
+  }
+  const swimlaneColors = {
+    DROPPABLE: "#FF0000",
+    DEFAULT: "#AAA"
+  }
+  let offsetY = 0;
+  let offsetX = 0;
+  let droppableSwimlane = null;
+
+  let swimlanes = {
+    swimlane1: {
+      y: 50,
+      height: 100
+    },
+    swimlane2: {
+      y: 150,
+      height: 100
+    },
+    swimlane3: {
+      y: 250,
+      height: 100
+    },
+    swimlane4: {
+      y: 350,
+      height: 100
+    }
+  }
+  let currentParent;
+
+  svg.addEventListener("mousedown", (event) => {
+    let target = event.target;
+
+    if (target.id.indexOf("swimlane") < 0) {
+      return;
+    }
+
+    draggedElement = target;
+    clonedElement = draggedElement.cloneNode(true);
+    draggedElement.style.fill = "#cccccc";
+    currentParent = draggedElement.getAttribute("data-parent");
+    svg.appendChild(clonedElement);
+    offsetY = event.y - draggedElement.getAttribute("y");
+    offsetX = event.x - draggedElement.getAttribute("x");
+
+    svg.addEventListener("mousemove", handleMouseMove);
+    svg.addEventListener("mouseup", handleMouseUp);
+  })
+
+  function handleMouseMove(ev) {
+    let x = ev.clientX - offsetX;
+    let y = ev.clientY - offsetY;
+    let height = draggedElement.getAttribute("height");
+    let dropZoneY = y + height / 2;
+    let dropzonePadding = 10;
+
+    dropZone.setAttribute("x2", 2000);
+    dropZone.setAttribute("y1", dropZoneY);
+    dropZone.setAttribute("y2", dropZoneY);
+
+    let isDroppable = false;
+
+    // if (droppableSwimlane) {
+    //   let swimlane = document.querySelector(`#${droppableSwimlane}`);
+    //   swimlane.setAttribute("fill", swimlaneColors.DEFAULT);
+    //   droppableSwimlane = null;
+    // }
+    let swimlanesList = Object.keys(swimlanes);
+
+    if (dropZoneY > swimlanes.swimlane1.y - dropzonePadding && dropZoneY < swimlanes.swimlane4.y + swimlanes.swimlane4.height + dropzonePadding) {
+      for (let i = 0; i < swimlanesList.length; i++) {
+        let key = swimlanesList[i];
+
+        let swimlaneBoundingBox = swimlanes[key];
+        let nextSwimlane = swimlanesList[i + 1];
+        let nextSwimlaneBoundingBox = swimlanes[swimlanesList[i + 1]];
+
+        if (key === currentParent) {
+          continue;
+        }
+
+        if (dropZoneY > swimlaneBoundingBox.y + dropzonePadding && dropZoneY < (swimlaneBoundingBox.y + swimlaneBoundingBox.height - dropzonePadding)) {
+          droppableSwimlane = key;
+          isDroppable = false;
+          break;
+        }
+
+        if (nextSwimlane !== currentParent &&
+            nextSwimlaneBoundingBox &&
+            dropZoneY >= swimlaneBoundingBox.y + swimlaneBoundingBox.height - dropzonePadding &&
+            dropZoneY <= nextSwimlaneBoundingBox.y + dropzonePadding) {
+          isDroppable = true;
+        }
+      }
+    }
+
+    if (isDroppable) {
+      dropZone.setAttribute("stroke-dasharray", lineType.SOLID);
+      dropZone.setAttribute("stroke", lineColors.ACTIVE);
+    } else {
+      dropZone.setAttribute("stroke-dasharray", lineType.DASHED);
+      dropZone.setAttribute("stroke", lineColors.INACTIVE);
+    }
+
+    clonedElement.setAttribute("x", x);
+    clonedElement.setAttribute("y", y);
+  }
+
+  function handleMouseUp(ev) {
+    draggedElement.style.fill = "#81d4fa";
+    svg.removeChild(clonedElement);
+    svg.removeEventListener("mousemove", handleMouseMove);
+    svg.removeEventListener("mouseup", handleMouseUp);
+    dropZone.setAttribute("x2", 0);
+    draggedElement = null;
+    clonedElement = null;
+  }
+</script>
+
+</body>
+</html>
