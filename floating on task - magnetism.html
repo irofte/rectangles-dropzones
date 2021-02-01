@@ -8,6 +8,12 @@
     text {
       user-select: none; /* Standard syntax */
     }
+    label {
+      display: block;
+    }
+    input {
+      margin-bottom: 10px;
+    }
   </style>
 </head>
 <body style="margin: 0;">
@@ -20,28 +26,39 @@
       <li><a href="./floating on task.html">Floating on task</a></li>
       <li><a href="./floating on task - magnetism.html">Floating on task - magnetism</a></li>
       <li><a href="./task on swimlanes.html">Task on swimlanes</a></li>
-      <li><a href="./task on swimlanes - magnetism.html">Task on swimlanes magnetism</a></li>
+      <li><a href="./task on swimlanes - magnetism.html">Task on swimlanes - magnetism</a></li>
     </ul>
+
+    <label for="rwPadding">The space above and below row <br> that could trigger dropzone between rows</label>
+    <input id="rwPadding" type="number" value="0" >
+
+    <label for="tskPadding">The space above and below task shape <br> that could trigger dropzone on top or bottom of a task</label>
+    <input id="tskPadding" type="number" value="10" >
   </div>
+
   <svg width="1800" height="1000">
     <rect id="row1" fill="#AAA" fill-opacity=0.1 x=50 y=40 width=1000 height=60></rect>
-    <text id="text1" x=50 y=50>Untitled task 1</text>
+    <text id="text1" x=110 y=50>Untitled milestone 1</text>
     <rect id="milestone1" data-parent="row1" x=150 y=50 width=50 height=50 fill="#81d4fa" fill-opacity=0.8></rect>
 
     <rect id="row2" fill="#AAA" fill-opacity=0.1 x=50 y=110 width=1000 height=60></rect>
     <text id="text2" x=50 y=120>Untitled task 2</text>
     <rect id="task2" data-parent="row2" x=50 y=120 width=400 height=50 fill="#81d4fa" fill-opacity=0.8></rect>
 
-    <rect id="row3" fill="#AAA" fill-opacity=0.1 x=50 y=180 width=1000 height=60></rect>
+    <rect id="row3" fill="#AAA" fill-opacity=0.1 x=50 y=180 width=1000 height=70></rect>
     <text id="text3" x=50 y=190>Untitled task 3</text>
     <rect id="task3" data-parent="row3" x=50 y=190 width=400 height=50 fill="#81d4fa" fill-opacity=0.8></rect>
+    <text id="text3-2" x=50 y=250>01/02/21</text>
 
-    <rect id="row4" fill="#AAA" fill-opacity=0.1 x=50 y=250 width=1000 height=60></rect>
-    <text id="text4" x=50 y=260>Untitled task 4</text>
-    <rect id="task4" data-parent="row4" x=50 y=260 width=400 height=50 fill="#81d4fa" fill-opacity=0.8></rect>
+    <rect id="row4" fill="#AAA" fill-opacity=0.1 x=50 y=260 width=1000 height=4></rect>
+    <rect id="task4" data-parent="row4" x=50 y=260 width=400 height=4 fill="#81d4fa" fill-opacity=0.8></rect>
+
+    <rect id="row5" fill="#AAA" fill-opacity=0.1 x=50 y=274 width=1000 height=20></rect>
+    <text id="text5" x=50 y=284>Untitled task 5</text>
+    <rect id="task5" data-parent="row5" x=50 y=284 width=400 height=10 fill="#81d4fa" fill-opacity=0.8></rect>
 
     <line id="drop-zone" x1=0 y1=0 x2=0 y2=0 stroke-width=1 stroke="#FF0000" stroke-dasharray="4 2"></line>
-</svg>
+  </svg>
 
 <script>
   let svg = document.querySelector("svg");
@@ -64,25 +81,28 @@
   let offsetX = 0;
   let droppableRow = null;
 
-  let rows = {
-    row1: {
-      y: 40,
-      height: 60
-    },
-    row2: {
-      y: 110,
-      height: 60
-    },
-    row3: {
-      y: 180,
-      height: 60
-    },
-    row4: {
-      y: 250,
-      height: 60
+  let rows = {};
+  let tasks = {};
+  let currentParent;
+  let dropzonePadding = 0;
+  let taskDropzonePadding = 0;
+
+  let rowsElements = document.querySelectorAll("[id*=row]");
+  let tasksElements = document.querySelectorAll("[id*=task]");
+  for (let i = 0; i < rowsElements.length; i++) {
+    const element = rowsElements[i];
+    rows[element.id] = {
+      y: Number(element.getAttribute("y")),
+      height: Number(element.getAttribute("height"))
     }
   }
-  let currentParent;
+  for (let i = 0; i < tasksElements.length; i++) {
+    const element = tasksElements[i];
+    tasks[element.id] = {
+      y: Number(element.getAttribute("y")),
+      height: Number(element.getAttribute("height"))
+    }
+  }
 
   svg.addEventListener("mousedown", (event) => {
     let target = event.target;
@@ -98,6 +118,10 @@
     svg.appendChild(clonedElement);
     offsetY = event.y - draggedElement.getAttribute("y");
     offsetX = event.x - draggedElement.getAttribute("x");
+    let rowInput = document.querySelector("#rwPadding");
+    let taskInput = document.querySelector("#tskPadding");
+    dropzonePadding = Number(rowInput.value || 0);
+    taskDropzonePadding = Number(taskInput.value || 0);
 
     svg.addEventListener("mousemove", handleMouseMove);
     svg.addEventListener("mouseup", handleMouseUp);
@@ -108,7 +132,6 @@
     let y = ev.clientY - offsetY;
     let height = draggedElement.getAttribute("height");
     let dropZoneY = y + height / 2;
-    let dropzonePadding = 2;
 
     dropZone.setAttribute("x2", 2000);
     dropZone.setAttribute("y1", dropZoneY);
@@ -123,7 +146,7 @@
     }
     let rowsList = Object.keys(rows);
 
-    if (dropZoneY > rows.row1.y - dropzonePadding && dropZoneY < rows.row4.y + rows.row4.height + dropzonePadding) {
+    if (dropZoneY > rows.row1.y - dropzonePadding && dropZoneY < rows.row5.y + rows.row5.height + dropzonePadding) {
       for (let i = 0; i < rowsList.length; i++) {
         let key = rowsList[i];
 
@@ -131,18 +154,31 @@
         let nextRow = rowsList[i + 1];
         let nextRowBoundingBox = rows[rowsList[i + 1]];
 
-
-        // if () {
-
-          // }
-
         if (key === currentParent) {
           continue;
         }
 
         if (dropZoneY > rowBoundingBox.y + dropzonePadding && dropZoneY < (rowBoundingBox.y + rowBoundingBox.height - dropzonePadding)) {
+
           droppableRow = key;
+          let magneticDropzoneY;
+          let currentTaskId = svg.querySelector(`rect[data-parent="${key}"]`).id;
+          let currentTaskBoundingBox = tasks[currentTaskId];
+
+          if (dropZoneY < currentTaskBoundingBox.y + taskDropzonePadding) {
+            magneticDropzoneY = currentTaskBoundingBox.y + 3;
+          } else if (dropZoneY < currentTaskBoundingBox.y + currentTaskBoundingBox.height - taskDropzonePadding) {
+            magneticDropzoneY = currentTaskBoundingBox.y + currentTaskBoundingBox.height / 2;
+          } else {
+            magneticDropzoneY = currentTaskBoundingBox.y + currentTaskBoundingBox.height - 3;
+          }
+          // Date below a task
+
+          dropZone.setAttribute("y1", magneticDropzoneY);
+          dropZone.setAttribute("y2", magneticDropzoneY);
           isDroppable = true;
+
+          // row position
           break;
         }
 
@@ -160,10 +196,10 @@
       }
     }
 
-    if (droppableRow) {
-      let row = document.querySelector(`#${droppableRow}`);
-      row.setAttribute("fill", rowColors.DROPPABLE);
-    }
+    // if (droppableRow) {
+    //   let row = document.querySelector(`#${droppableRow}`);
+    //   row.setAttribute("fill", rowColors.DROPPABLE);
+    // }
 
     if (isDroppable) {
       dropZone.setAttribute("stroke-dasharray", lineType.SOLID);

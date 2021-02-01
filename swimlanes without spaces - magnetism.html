@@ -8,6 +8,12 @@
     text {
       user-select: none; /* Standard syntax */
     }
+    label {
+      display: block;
+    }
+    input {
+      margin-bottom: 10px;
+    }
   </style>
 </head>
 <body style="margin: 0;">
@@ -22,23 +28,26 @@
       <li><a href="./task on swimlanes.html">Task on swimlanes</a></li>
       <li><a href="./task on swimlanes - magnetism.html">Task on swimlanes magnetism</a></li>
     </ul>
+
+    <label for="swmPadding">The space above and below swimlane <br>that could trigger dropzone between swimlanes</label>
+    <input id="swmPadding" type="number" value="0" >
   </div>
   <svg width="1800" height="1000">
     <rect id="swimlane1" fill="#81d4fa" fill-opacity=0.8 x=50 y=50 width=150 height=100></rect>
-    <rect id="swimlane1_body" fill="#81d4fa" fill-opacity=0.2 x=200 y=50 width=1000 height=100 ></rect>
-    <rect id="swimlane1_outline" style="pointer-events: none;" fill="transparent" stroke="#0000FF" stroke-width=2 x=50 y=51 width=1150 height=98 ></rect>
+    <rect id="swm1_body" fill="#81d4fa" fill-opacity=0.2 x=200 y=50 width=1000 height=100 ></rect>
+    <rect id="swm1_outline" style="pointer-events: none;" fill="transparent" stroke="#0000FF" stroke-width=2 x=50 y=51 width=1150 height=98 ></rect>
 
     <rect id="swimlane2" fill="#81d4fa" fill-opacity=0.8 x=50 y=150 width=150 height=100></rect>
-    <rect id="swimlane2_body" fill="#81d4fa" fill-opacity=0.2 x=200 y=150 width=1000 height=100 ></rect>
-    <rect id="swimlane2_outline" style="pointer-events: none;" fill="transparent" stroke="#0000FF" stroke-width=2 x=50 y=151 width=1150 height=98 ></rect>
+    <rect id="swm2_body" fill="#81d4fa" fill-opacity=0.2 x=200 y=150 width=1000 height=100 ></rect>
+    <rect id="swm2_outline" style="pointer-events: none;" fill="transparent" stroke="#0000FF" stroke-width=2 x=50 y=151 width=1150 height=98 ></rect>
 
     <rect id="swimlane3" fill="#81d4fa" fill-opacity=0.8 x=50 y=250 width=150 height=100></rect>
-    <rect id="swimlane3_body" fill="#81d4fa" fill-opacity=0.2 x=200 y=250 width=1000 height=100 ></rect>
-    <rect id="swimlane3_outline" style="pointer-events: none;" fill="transparent" stroke="#0000FF" stroke-width=2 x=50 y=251 width=1150 height=98 ></rect>
+    <rect id="swm3_body" fill="#81d4fa" fill-opacity=0.2 x=200 y=250 width=1000 height=100 ></rect>
+    <rect id="swm3_outline" style="pointer-events: none;" fill="transparent" stroke="#0000FF" stroke-width=2 x=50 y=251 width=1150 height=98 ></rect>
 
-    <rect id="swimlane4" fill="#81d4fa" fill-opacity=0.8 x=50 y=350 width=150 height=100></rect>
-    <rect id="swimlane4_body" fill="#81d4fa" fill-opacity=0.2 x=200 y=350 width=1000 height=100 ></rect>
-    <rect id="swimlane4_outline" style="pointer-events: none;" fill="transparent" stroke="#0000FF" stroke-width=2 x=50 y=351 width=1150 height=98 ></rect>
+    <rect id="swimlane4" fill="#81d4fa" fill-opacity=0.8 x=50 y=360 width=150 height=100></rect>
+    <rect id="swm4_body" fill="#81d4fa" fill-opacity=0.2 x=200 y=360 width=1000 height=100 ></rect>
+    <rect id="swm4_outline" style="pointer-events: none;" fill="transparent" stroke="#0000FF" stroke-width=2 x=50 y=361 width=1150 height=98 ></rect>
 
     <line id="drop-zone" x1=0 y1=0 x2=0 y2=0 stroke-width=1 stroke="#FF0000" stroke-dasharray="4 2"></line>
 </svg>
@@ -64,25 +73,18 @@
   let offsetX = 0;
   let droppableSwimlane = null;
 
-  let swimlanes = {
-    swimlane1: {
-      y: 50,
-      height: 100
-    },
-    swimlane2: {
-      y: 150,
-      height: 100
-    },
-    swimlane3: {
-      y: 250,
-      height: 100
-    },
-    swimlane4: {
-      y: 350,
-      height: 100
+  let swimlanes = {};
+  let currentParent;
+  let dropzonePadding = 0;
+
+  let swimlanesElements = document.querySelectorAll("[id*=swimlane]");
+  for (let i = 0; i < swimlanesElements.length; i++) {
+    const element = swimlanesElements[i];
+    swimlanes[element.id] = {
+      y: Number(element.getAttribute("y")),
+      height: Number(element.getAttribute("height"))
     }
   }
-  let currentParent;
 
   svg.addEventListener("mousedown", (event) => {
     let target = event.target;
@@ -98,6 +100,8 @@
     svg.appendChild(clonedElement);
     offsetY = event.y - draggedElement.getAttribute("y");
     offsetX = event.x - draggedElement.getAttribute("x");
+    let swimlaneInput = document.querySelector("#swmPadding");
+    dropzonePadding = Number(swimlaneInput.value || 0);
 
     svg.addEventListener("mousemove", handleMouseMove);
     svg.addEventListener("mouseup", handleMouseUp);
@@ -108,7 +112,6 @@
     let y = ev.clientY - offsetY;
     let height = draggedElement.getAttribute("height");
     let dropZoneY = y + height / 2;
-    let dropzonePadding = 10;
 
     dropZone.setAttribute("x2", 2000);
     dropZone.setAttribute("y1", dropZoneY);

@@ -8,6 +8,12 @@
     text {
       user-select: none; /* Standard syntax */
     }
+    label {
+      display: block;
+    }
+    input {
+      margin-bottom: 10px;
+    }
   </style>
 </head>
 <body style="margin: 0;">
@@ -20,8 +26,11 @@
       <li><a href="./floating on task.html">Floating on task</a></li>
       <li><a href="./floating on task - magnetism.html">Floating on task - magnetism</a></li>
       <li><a href="./task on swimlanes.html">Task on swimlanes</a></li>
-      <li><a href="./task on swimlanes - magnetism.html">Task on swimlanes magnetism</a></li>
+      <li><a href="./task on swimlanes - magnetism.html">Task on swimlanes - magnetism</a></li>
     </ul>
+
+    <label for="rwPadding">The space above and below row <br>that could trigger dropzone between rows</label>
+    <input id="rwPadding" type="number" value="0" >
   </div>
   <svg width="1800" height="1000">
     <rect id="row1" fill="#AAA" fill-opacity=0.1 x=50 y=40 width=1000 height=60></rect>
@@ -63,25 +72,20 @@
   let offsetX = 0;
   let droppableRow = null;
 
-  let rows = {
-    row1: {
-      y: 40,
-      height: 60
-    },
-    row2: {
-      y: 110,
-      height: 10
-    },
-    row3: {
-      y: 130,
-      height: 60
-    },
-    row4: {
-      y: 200,
-      height: 60
+
+  let rows = {};
+  let currentParent;
+  let dropzonePadding = 0;
+  let taskDropzonePadding = 0;
+
+  let rowsElements = document.querySelectorAll("[id*=row]");
+  for (let i = 0; i < rowsElements.length; i++) {
+    const element = rowsElements[i];
+    rows[element.id] = {
+      y: Number(element.getAttribute("y")),
+      height: Number(element.getAttribute("height"))
     }
   }
-  let currentParent;
 
   svg.addEventListener("mousedown", (event) => {
     let target = event.target;
@@ -97,6 +101,8 @@
     svg.appendChild(clonedElement);
     offsetY = event.y - draggedElement.getAttribute("y");
     offsetX = event.x - draggedElement.getAttribute("x");
+    let rowInput = document.querySelector("#rwPadding");
+    dropzonePadding = Number(rowInput.value || 0);
 
     svg.addEventListener("mousemove", handleMouseMove);
     svg.addEventListener("mouseup", handleMouseUp);
@@ -107,7 +113,6 @@
     let y = ev.clientY - offsetY;
     let height = draggedElement.getAttribute("height");
     let dropZoneY = y + height / 2;
-    let dropzonePadding = 3;
 
     dropZone.setAttribute("x2", 2000);
     dropZone.setAttribute("y1", dropZoneY);
@@ -152,7 +157,6 @@
           isDroppable = true;
         }
 
-
       }
     }
 
@@ -168,10 +172,6 @@
       dropZone.setAttribute("stroke-dasharray", lineType.DASHED);
       dropZone.setAttribute("stroke", lineColors.INACTIVE);
     }
-
-
-    // dropZone.setAttribute("stroke-dasharray", lineType.SOLID);
-    // dropZone.setAttribute("stroke", lineColors.ACTIVE);
 
     clonedElement.setAttribute("x", x);
     clonedElement.setAttribute("y", y);
