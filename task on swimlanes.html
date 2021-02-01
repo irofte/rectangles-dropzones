@@ -20,7 +20,7 @@
       <li><a href="./floating on task.html">Floating on task</a></li>
       <li><a href="./floating on task - magnetism.html">Floating on task - magnetism</a></li>
       <li><a href="./task on swimlanes.html">Task on swimlanes</a></li>
-      <li><a href="./task on swimlanes - magnetism.html">Task on swimlane</a></li>
+      <li><a href="./task on swimlanes - magnetism.html">Task on swimlanes - magnetism</a></li>
     </ul>
   </div>
   <svg width="1800" height="1000">
@@ -50,18 +50,6 @@
     <rect id="swimlane1" fill="#81d4fa" fill-opacity=0.8 x=50 y=360 width=150 height=220></rect>
     <rect id="swimlane1_body" fill="#81d4fa" fill-opacity=0.2 x=200 y=360 width=850 height=220 ></rect>
     <rect id="swimlane1_outline" style="pointer-events: none;" fill="transparent" stroke="#0000FF" stroke-width=2 x=50 y=361 width=1000 height=218 ></rect>
-
-    <!-- <rect id="row3" fill="#AAA" fill-opacity=0.1 x=50 y=140 width=1000 height=60></rect>
-    <text id="text3" x=250 y=150>Untitled task 3</text>
-    <rect id="task3" data-parent="row1" x=250 y=150 width=400 height=50 fill="#81d4fa" fill-opacity=0.8></rect>
-
-    <rect id="row4" fill="#AAA" fill-opacity=0.1 x=50 y=210 width=1000 height=60></rect>
-    <text id="text4" x=250 y=220>Untitled task 4</text>
-    <rect id="task4" data-parent="row1" x=250 y=220 width=400 height=50 fill="#81d4fa" fill-opacity=0.8></rect>
-
-    <rect id="row5" fill="#AAA" fill-opacity=0.1 x=50 y=280 width=1000 height=60></rect>
-    <text id="text5" x=250 y=290>Untitled task 5</text>
-    <rect id="task5" data-parent="row1" x=250 y=290 width=400 height=50 fill="#81d4fa" fill-opacity=0.8></rect> -->
 
     <line id="drop-zone" x1=0 y1=0 x2=0 y2=0 stroke-width=1 stroke="#FF0000" stroke-dasharray="4 2"></line>
 </svg>
@@ -147,7 +135,8 @@
     let y = ev.clientY - offsetY;
     let height = draggedElement.getAttribute("height");
     let dropZoneY = y + height / 2;
-    let dropzonePadding = 5;
+    let rowDropzonePadding = 3;
+    let dropzonePadding = 10;
 
     dropZone.setAttribute("x2", 2000);
     dropZone.setAttribute("y1", dropZoneY);
@@ -164,7 +153,7 @@
     let rowsList = Object.keys(rows);
     let swimlanesList = Object.keys(swimlanes);
 
-    if (dropZoneY > rows.row1.y - dropzonePadding/* && dropZoneY < rows.row4.y + rows.row4.height + dropzonePadding */) {
+    if (dropZoneY > rows.row1.y - rowDropzonePadding && dropZoneY < rows.row2.y + rows.row2.height) {
       for (let i = 0; i < rowsList.length; i++) {
         let key = rowsList[i];
 
@@ -176,7 +165,7 @@
           continue;
         }
 
-        if (dropZoneY > rowBoundingBox.y + dropzonePadding && dropZoneY < (rowBoundingBox.y + rowBoundingBox.height - dropzonePadding)) {
+        if (dropZoneY > rowBoundingBox.y + rowDropzonePadding && dropZoneY < (rowBoundingBox.y + rowBoundingBox.height - rowDropzonePadding)) {
           droppableRow = key;
           isDroppable = true;
           break;
@@ -184,14 +173,60 @@
 
         if (nextRow !== currentParent &&
             nextRowBoundingBox &&
-            dropZoneY >= rowBoundingBox.y + rowBoundingBox.height - dropzonePadding &&
-            dropZoneY <= nextRowBoundingBox.y + dropzonePadding) {
+            dropZoneY >= rowBoundingBox.y + rowBoundingBox.height - rowDropzonePadding &&
+            dropZoneY <= nextRowBoundingBox.y + rowDropzonePadding) {
           isDroppable = true;
         }
       }
+    }
 
+    if (dropZoneY > swimlanes.swimlane1.y && dropZoneY < swimlanes.swimlane2.y + swimlanes.swimlane2.height) {
       for (let i = 0; i < swimlanesList.length; i++) {
+        let key = swimlanesList[i];
+        let swimlaneBoundingBox = swimlanes[key];
+        let nextSwimlane = swimlanesList[i + 1];
+        let nextSwimlaneBoundingBox = swimlanes[swimlanesList[i + 1]];
 
+        // CHeck if should be first or last in swimlane
+        // Iterate rows
+
+        if (dropZoneY > swimlaneBoundingBox.y && dropZoneY < swimlaneBoundingBox.y + dropzonePadding) {
+          isDroppable = true
+          break;
+        }
+
+        if (dropZoneY > swimlaneBoundingBox.y + swimlaneBoundingBox.height - dropzonePadding &&
+            dropZoneY < swimlaneBoundingBox.y + swimlaneBoundingBox.height) {
+          isDroppable = true
+          break;
+        }
+
+        if (dropZoneY > rows.row3.y && dropZoneY < rows.row5.y + rows.row5.height) {
+          for (let i = 0; i < rowsList.length; i++) {
+            let key = rowsList[i];
+
+            let rowBoundingBox = rows[key];
+            let nextRow = rowsList[i + 1];
+            let nextRowBoundingBox = rows[rowsList[i + 1]];
+
+            if (key === currentParent) {
+              continue;
+            }
+
+            if (dropZoneY > rowBoundingBox.y + rowDropzonePadding && dropZoneY < (rowBoundingBox.y + rowBoundingBox.height - rowDropzonePadding)) {
+              droppableRow = key;
+              isDroppable = true;
+              break;
+            }
+
+            if (nextRow !== currentParent &&
+                nextRowBoundingBox &&
+                dropZoneY >= rowBoundingBox.y + rowBoundingBox.height - rowDropzonePadding &&
+                dropZoneY <= nextRowBoundingBox.y + rowDropzonePadding) {
+              isDroppable = true;
+            }
+          }
+        }
       }
     }
 
