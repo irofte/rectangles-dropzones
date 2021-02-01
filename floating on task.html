@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Floating on task - magnetism</title>
+  <title>Floating on task</title>
   <style>
     text {
       user-select: none; /* Standard syntax */
@@ -26,19 +26,19 @@
   <svg width="1800" height="1000">
     <rect id="row1" fill="#AAA" fill-opacity=0.1 x=50 y=40 width=1000 height=60></rect>
     <text id="text1" x=50 y=50>Untitled task 1</text>
-    <rect id="task1" data-parent="row1" x=50 y=50 width=400 height=50 fill="#81d4fa" fill-opacity=0.8></rect>
+    <rect id="milestone1" data-parent="row1" x=150 y=50 width=50 height=50 fill="#81d4fa" fill-opacity=0.8></rect>
 
-    <rect id="row2" fill="#AAA" fill-opacity=0.1 x=50 y=110 width=1000 height=20></rect>
+    <rect id="row2" fill="#AAA" fill-opacity=0.1 x=50 y=110 width=1000 height=60></rect>
     <text id="text2" x=50 y=120>Untitled task 2</text>
-    <rect id="task2" data-parent="row2" x=50 y=120 width=400 height=10 fill="#81d4fa" fill-opacity=0.8></rect>
+    <rect id="task2" data-parent="row2" x=50 y=120 width=400 height=50 fill="#81d4fa" fill-opacity=0.8></rect>
 
-    <rect id="row3" fill="#AAA" fill-opacity=0.1 x=50 y=140 width=1000 height=60></rect>
-    <text id="text3" x=50 y=150>Untitled task 3</text>
-    <rect id="task3" data-parent="row3" x=50 y=150 width=400 height=50 fill="#81d4fa" fill-opacity=0.8></rect>
+    <rect id="row3" fill="#AAA" fill-opacity=0.1 x=50 y=180 width=1000 height=60></rect>
+    <text id="text3" x=50 y=190>Untitled task 3</text>
+    <rect id="task3" data-parent="row3" x=50 y=190 width=400 height=50 fill="#81d4fa" fill-opacity=0.8></rect>
 
-    <rect id="row4" fill="#AAA" fill-opacity=0.1 x=50 y=210 width=1000 height=60></rect>
-    <text id="text4" x=50 y=220>Untitled task 4</text>
-    <rect id="task4" data-parent="row4" x=50 y=220 width=400 height=50 fill="#81d4fa" fill-opacity=0.8></rect>
+    <rect id="row4" fill="#AAA" fill-opacity=0.1 x=50 y=250 width=1000 height=60></rect>
+    <text id="text4" x=50 y=260>Untitled task 4</text>
+    <rect id="task4" data-parent="row4" x=50 y=260 width=400 height=50 fill="#81d4fa" fill-opacity=0.8></rect>
 
     <line id="drop-zone" x1=0 y1=0 x2=0 y2=0 stroke-width=1 stroke="#FF0000" stroke-dasharray="4 2"></line>
 </svg>
@@ -71,14 +71,14 @@
     },
     row2: {
       y: 110,
-      height: 20
+      height: 60
     },
     row3: {
-      y: 140,
+      y: 180,
       height: 60
     },
     row4: {
-      y: 210,
+      y: 250,
       height: 60
     }
   }
@@ -87,7 +87,7 @@
   svg.addEventListener("mousedown", (event) => {
     let target = event.target;
 
-    if (target.id.indexOf("task") < 0) {
+    if (target.id.indexOf("milestone") < 0) {
       return;
     }
 
@@ -108,7 +108,7 @@
     let y = ev.clientY - offsetY;
     let height = draggedElement.getAttribute("height");
     let dropZoneY = y + height / 2;
-    let dropzonePadding = 5;
+    let dropzonePadding = 2;
 
     dropZone.setAttribute("x2", 2000);
     dropZone.setAttribute("y1", dropZoneY);
