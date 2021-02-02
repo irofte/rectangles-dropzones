@@ -176,6 +176,8 @@
 
         if (dropZoneY > rowBoundingBox.y + rowDropzonePadding && dropZoneY < (rowBoundingBox.y + rowBoundingBox.height - rowDropzonePadding)) {
           droppableRow = key;
+          dropZone.setAttribute("y1", rowBoundingBox.y + rowBoundingBox.height / 2);
+          dropZone.setAttribute("y2", rowBoundingBox.y + rowBoundingBox.height / 2);
           isDroppable = true;
           break;
         }
@@ -237,6 +239,8 @@
 
             if (dropZoneY > rowBoundingBox.y + rowDropzonePadding && dropZoneY < (rowBoundingBox.y + rowBoundingBox.height - rowDropzonePadding)) {
               droppableRow = key;
+              dropZone.setAttribute("y1", rowBoundingBox.y + rowBoundingBox.height / 2);
+              dropZone.setAttribute("y2", rowBoundingBox.y + rowBoundingBox.height / 2);
               isDroppable = true;
               break;
             }
