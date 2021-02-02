@@ -173,10 +173,10 @@
       }
     }
 
-    // if (droppableRow) {
-    //   let row = document.querySelector(`#${droppableRow}`);
-    //   row.setAttribute("fill", rowColors.DROPPABLE);
-    // }
+    if (droppableRow) {
+      let row = document.querySelector(`#${droppableRow}`);
+      row.setAttribute("fill", rowColors.DROPPABLE);
+    }
 
     if (isDroppable) {
       dropZone.setAttribute("stroke-dasharray", lineType.SOLID);
