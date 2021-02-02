@@ -141,6 +141,8 @@
 
         if (dropZoneY > rowBoundingBox.y + dropzonePadding && dropZoneY < (rowBoundingBox.y + rowBoundingBox.height - dropzonePadding)) {
           droppableRow = key;
+          dropZone.setAttribute("y1", rowBoundingBox.y + rowBoundingBox.height / 2);
+          dropZone.setAttribute("y2", rowBoundingBox.y + rowBoundingBox.height / 2);
           isDroppable = true;
           break;
         }
